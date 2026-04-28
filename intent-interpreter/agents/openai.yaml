@@ -1,0 +1,4 @@
+interface:
+  display_name: "Intent Interpreter"
+  short_description: "Interpret prompts into structured, uncertainty-aware intent"
+  default_prompt: "Use $intent-interpreter to convert this request into strict intent YAML."

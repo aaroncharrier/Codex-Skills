@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execution Planner"
+  short_description: "Turn specs into traceable work plans"
+  default_prompt: "Use $execution-planner to convert a refined specification into a clear, traceable YAML execution plan."

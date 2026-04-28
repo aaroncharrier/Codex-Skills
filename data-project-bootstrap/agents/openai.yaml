@@ -1,0 +1,4 @@
+interface:
+  display_name: "Data Project Bootstrap"
+  short_description: "Bootstrap Codex docs for new data projects"
+  default_prompt: "Use $data-project-bootstrap to scaffold Codex project docs for this new data project."

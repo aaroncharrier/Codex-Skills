@@ -1,0 +1,4 @@
+interface:
+  display_name: "Interview Engine"
+  short_description: "Refine inputs with structured questions"
+  default_prompt: "Use $interview-engine to refine this request by asking the highest-leverage clarifying questions in strict YAML."

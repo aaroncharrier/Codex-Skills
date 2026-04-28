@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validator File Writer"
+  short_description: "Validate artifacts against spec and plan"
+  default_prompt: "Use $validator-file-writer to evaluate this generated artifact against its specification and execution plan."
