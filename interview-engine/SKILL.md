@@ -5,14 +5,38 @@ description: Resolve ambiguity in a user request through a YAML-backed requireme
 
 # Interview Engine
 
-Resolve only the ambiguity that would change the artifact. Keep `interview_questions.yaml` as the source of truth.
+Resolve only the ambiguity that would change the artifact. Keep `interview_questions.yaml` as the canonical record and mirror the current state into a compact snapshot for downstream prompt building.
+
+## Handoff Contract
+
+- Canonical file: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`
+- Compact snapshot: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`
+- Downstream prompt files: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/prompt.md` and `follow-up.md`
+- The snapshot must contain only the current active answer block plus the resolved summary fields needed by the builder.
+
+```json
+{
+  "session_name": "session-<yyyy-MM-dd_HH-mm-ss>",
+  "source": ".../interview_questions.yaml",
+  "confidence": 0.0,
+  "ready_for_handoff": false,
+  "assumption_lines": [],
+  "output_lines": [],
+  "questions": [
+    {
+      "question_id": "Q1",
+      "question": "",
+      "your_answer": ""
+    }
+  ]
+}
+```
 
 ## Token Contract
 
-- Avoid loading the full YAML into context.
-- Avoid rereading historical questions.
-- Avoid regenerating unchanged content.
-- Process only the active answer block plus the minimal surrounding structure needed for a safe patch.
+- Do not load the full YAML into context.
+- Do not reread historical questions once they have been resolved into `session_state.json`.
+- Only inspect the active answer block after `# === ACTIVE_ANSWER_BLOCK_START ===` plus the minimal surrounding structure needed for a safe patch.
 - Keep commentary minimal.
 
 ## Workflow
@@ -24,14 +48,14 @@ Resolve only the ambiguity that would change the artifact. Keep `interview_quest
    - references
    - constraints
    - success criteria
-   - codex personality
+   - Codex personality
    - external framework or template alignment
-2. Generate a larger internal pool of candidate questions.
-3. Output only the top 10 questions.
-4. After the user responds read only the active answer block after `# === ACTIVE_ANSWER_BLOCK_START ===`.
-5. After the user responds, normalize answers into resolved_inputs, resolved_outputs, constraints, decisions, assumptions, codex_personality, and success_criteria.
-6. Resolve contradictions before asking anything new.
-7. Recalculate confidence and either ask the next smallest useful set of questions or terminate.
+2. Generate an internal pool of candidate questions.
+3. Ask only the smallest useful batch of high-leverage questions.
+4. After the user responds, patch only the active answer block and the derived summary fields.
+5. Run `scripts/sync_session_state.ps1` to refresh `session_state.json` from the YAML file. If the shell blocks `.ps1` execution, invoke it with `powershell -ExecutionPolicy Bypass -File`.
+6. Recalculate confidence after every answer batch.
+7. Stop the interview at `confidence >= 0.95` once blocking ambiguity is resolved, then hand off to `interview-prompt-builder` using the snapshot.
 
 ## Question Design
 
@@ -59,8 +83,9 @@ For each question, always provide:
 
 Do:
 
-- capture missing requirements, inputs, outputs, references, constraints, success criteria, codex personality, or external reference rules
+- capture missing requirements, inputs, outputs, references, constraints, success criteria, Codex personality, or external reference rules
 - record questions and answers in the YAML file
+- keep `session_state.json` current as the compact handoff artifact
 - increase confidence only when ambiguity actually decreases
 
 Do not:
@@ -100,15 +125,16 @@ questions:
       - ""
     recommended_answer: ""
     your_answer: ""
+# === ACTIVE_ANSWER_BLOCK_START ===
 ```
 
 ## Write Rules
 
-- Use the active marker exactly: `# === ACTIVE_ANSWER_BLOCK_START ===`
 - Move the marker to the first newly appended question.
 - Append only new questions.
 - Update only `confidence`, affected assumptions, and `output` fields derived from new answers.
 - Keep question ids monotonic.
+- Keep the snapshot file in lockstep with the YAML file.
 
 ## Question Rules
 
@@ -119,7 +145,7 @@ Ask only if the answer could change:
 - constraints or acceptance criteria
 - validation behavior
 - how success is measured
-- personality codex should assume
+- personality Codex should assume
 - external template or framework alignment
 
 Prefer `one_of`, `multi_select`, or `numeric` when they fit. Defer lower-impact questions.
@@ -130,4 +156,4 @@ Stop when `confidence >= 0.95` and blocking ambiguity is resolved.
 
 On non-terminal turns, output only:
 
-`I updated the session-<yyyy-MM-dd_HH-mm-ss> YAML file with additional questions.`
+`I updated the session-<yyyy-MM-dd_HH-mm-ss> YAML file and session_state.json with additional questions.`
