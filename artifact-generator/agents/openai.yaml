@@ -1,4 +1,0 @@
-interface:
-  display_name: "Artifact Generator"
-  short_description: "Render final artifacts from fixed plans"
-  default_prompt: "Use $artifact-generator to render the final artifact from a completed specification and execution plan."

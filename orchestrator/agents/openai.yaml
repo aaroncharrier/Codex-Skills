@@ -1,4 +1,0 @@
-interface:
-  display_name: "Orchestrator"
-  short_description: "Coordinate the six-skill delivery pipeline"
-  default_prompt: "Use $orchestrator to run the six-skill pipeline from raw prompt to validated artifact."

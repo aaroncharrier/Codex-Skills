@@ -1,10 +1,15 @@
 # Execution Planner Contract
 
-Use this file as the canonical reference for input requirements, output schema, scope boundaries, and traceability checks. Do not quote it in the final response. Apply it.
+Use this file as the canonical reference for input requirements, output schema, scope boundaries, and traceability checks.
+
+## Preferred Input Source
+
+Prefer a persisted specification snapshot or the `refined_understanding` and `decision_log` pair over duplicated inline prose.
 
 ## Required Inputs
 
 Proceed only when all of the following are available and internally coherent:
+
 - `refined_understanding`
 - `decision_log`
 
@@ -25,12 +30,14 @@ execution_plan:
 ## Boundary Rules
 
 Allowed:
+
 - define a high-level execution approach
 - produce ordered actionable steps
 - preserve traceability to requirements, constraints, outputs, decisions, assumptions, and success criteria
 - tighten wording and remove redundant steps
 
 Forbidden:
+
 - asking questions
 - generating code or deliverables
 - redefining the specification
@@ -40,16 +47,19 @@ Forbidden:
 ## Traceability Rules
 
 For every step:
+
 - identify what requirement, constraint, output, decision, assumption, or success criterion it supports
 - remove the step if no such mapping exists
 
 For the plan as a whole:
-- cover the full path from input preparation to output validation
+
+- cover the path from input preparation to output validation
 - ensure material constraints and key decisions are reflected in the plan
 
 ## Failure Conditions
 
 Do not proceed when:
+
 - constraints conflict with decisions
 - outputs cannot be reached from the stated inputs and decisions
 - the specification still needs clarification or normalization
