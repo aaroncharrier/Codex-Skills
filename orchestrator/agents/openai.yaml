@@ -1,4 +1,0 @@
-interface:
-  display_name: "Orchestrator"
-  short_description: "Enforce the six-stage delivery pipeline"
-  default_prompt: "Use $orchestrator to run the six-stage pipeline exactly as written: initialize or resume session_state, advance one stage at a time, persist each raw stage output, validate every handoff, and never answer outside the canonical session_result or stage payloads."
