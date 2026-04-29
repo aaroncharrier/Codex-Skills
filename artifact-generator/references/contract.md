@@ -1,15 +1,24 @@
 # Artifact Generator Contract
 
-Use this file as the canonical reference for input requirements, output schemas, scope boundaries, deterministic rendering rules, and failure behavior. Do not quote it in the final response. Apply it.
+Use this file as the canonical reference for input requirements, output schemas, scope boundaries, deterministic rendering rules, and failure behavior.
+
+## Preferred Input Source
+
+Prefer persisted stage snapshots over duplicated inline payloads.
 
 ## Required Inputs
 
 Proceed only when all of the following are available and structurally ready:
-- `final_specification`
+
 - `execution_plan`
+- one of:
+  - `final_specification`
+  - `refined_understanding` and `decision_log`
+  - a persisted specification snapshot containing those sections
 
 Optional:
-- `artifact_type` when it is not unambiguously embedded in `final_specification`
+
+- `artifact_type` when it is not unambiguously embedded in the specification
 
 If any required section is missing, malformed, contradictory, or under-refined, the request is not ready for this skill.
 
@@ -55,6 +64,7 @@ List only the missing or structurally unready inputs in `missing`.
 ## Boundary Rules
 
 Allowed:
+
 - map execution steps to artifact structure
 - preserve plan ordering exactly
 - render the final artifact in the required target format
@@ -62,6 +72,7 @@ Allowed:
 - halt and hand off upstream when the contract is not met
 
 Forbidden:
+
 - asking questions
 - modifying the specification
 - modifying the execution plan
@@ -80,10 +91,11 @@ Forbidden:
 ## Handoff Rules
 
 Hand off to `$execution-planner` when:
+
 - required inputs are missing
 - artifact type cannot be identified
 - execution steps are absent or malformed
 - the plan and specification conflict structurally
-- any deterministic rendering would require plan deviation
+- deterministic rendering would require plan deviation
 
 Do not repair the inputs inside this skill.

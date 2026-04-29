@@ -12,17 +12,16 @@ from pathlib import Path
 import yaml
 
 
-REQUIRED = {
-    "intent-interpreter": [["intent_state", "confidence"], ["confidence"]],
-    "interview-engine": [["interview_result", "confidence"], ["confidence"]],
-    "specification-builder": [["final_specification"]],
-    "execution-planner": [["execution_plan"]],
-    "artifact-generator": [["generated_artifact"], ["final_artifact"]],
-    "validator-file-writer": [["validation", "pass_fail"]],
+VALID_STAGES = {
+    "intent-interpreter",
+    "interview-engine",
+    "specification-builder",
+    "execution-planner",
+    "artifact-generator",
+    "validator-file-writer",
 }
-
-VALID_STAGES = set(REQUIRED)
 VALID_PASS_FAIL = {"PASS", "FAIL"}
+VALID_ROUTING_HINTS = {"spec_issue", "plan_issue", "artifact_issue", "structural_issue", "none"}
 
 
 def load_yaml(path: Path):
@@ -34,45 +33,105 @@ def load_yaml(path: Path):
         raise ValueError(f"invalid YAML: {exc}") from exc
 
 
-def lookup_path(payload, path_parts):
-    current = payload
-    for part in path_parts:
-        if not isinstance(current, dict) or part not in current:
-            return None
-        current = current[part]
-    return current
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
 
 
-def ensure_dict(payload):
-    if not isinstance(payload, dict):
-        raise ValueError("top-level payload must be a mapping")
+def require_mapping(value, label):
+    require(isinstance(value, dict), f"{label} must be a mapping")
+    return value
 
 
-def validate_confidence(value, label):
-    if not isinstance(value, (int, float)):
-        raise ValueError(f"{label} must be numeric")
-    if value < 0 or value > 1:
-        raise ValueError(f"{label} must be between 0 and 1")
+def require_numeric(value, label):
+    require(isinstance(value, (int, float)), f"{label} must be numeric")
+    require(0 <= value <= 1, f"{label} must be between 0 and 1")
+
+
+def lookup_confidence(payload):
+    if isinstance(payload, dict):
+        if isinstance(payload.get("confidence"), (int, float)):
+            return payload["confidence"], "confidence"
+        nested = payload.get("interview_result")
+        if isinstance(nested, dict) and isinstance(nested.get("confidence"), (int, float)):
+            return nested["confidence"], "interview_result.confidence"
+    return None, None
+
+
+def validate_intent(payload):
+    payload = require_mapping(payload, "payload")
+    require_mapping(payload.get("intent"), "intent")
+    require_numeric(payload.get("confidence"), "confidence")
+
+
+def validate_interview(payload):
+    payload = require_mapping(payload, "payload")
+    confidence, label = lookup_confidence(payload)
+    require_numeric(confidence, label or "confidence")
+
+    for key in ("questions",):
+        if key in payload:
+            require(isinstance(payload[key], list), f"{key} must be a list when present")
+    if "interview_result" in payload:
+        interview_result = require_mapping(payload["interview_result"], "interview_result")
+        if "questions" in interview_result:
+            require(isinstance(interview_result["questions"], list), "interview_result.questions must be a list")
+
+
+def validate_specification(payload):
+    payload = require_mapping(payload, "payload")
+    require_mapping(payload.get("refined_understanding"), "refined_understanding")
+    require_mapping(payload.get("decision_log"), "decision_log")
+
+
+def validate_plan(payload):
+    payload = require_mapping(payload, "payload")
+    require_mapping(payload.get("execution_plan"), "execution_plan")
+
+
+def validate_artifact(payload):
+    payload = require_mapping(payload, "payload")
+    if payload.get("status") == "incomplete_inputs":
+        require(isinstance(payload.get("missing"), list), "missing must be a list")
+        handoff = require_mapping(payload.get("handoff_required"), "handoff_required")
+        require(isinstance(handoff.get("target_skill"), str), "handoff_required.target_skill must be a string")
+        require(isinstance(handoff.get("reason"), str), "handoff_required.reason must be a string")
+        return
+
+    require_mapping(payload.get("artifact"), "artifact")
+    require_mapping(payload.get("artifact_metadata"), "artifact_metadata")
+    require_mapping(payload.get("validation_flags"), "validation_flags")
+
+
+def validate_validation(payload):
+    payload = require_mapping(payload, "payload")
+    if payload.get("status") == "validation_handoff_required":
+        handoff = require_mapping(payload.get("handoff_required"), "handoff_required")
+        require(isinstance(handoff.get("target_skill"), str), "handoff_required.target_skill must be a string")
+        require(isinstance(handoff.get("reason"), str), "handoff_required.reason must be a string")
+        return
+
+    report = require_mapping(payload.get("validation_report"), "validation_report")
+    require(report.get("pass_fail") in VALID_PASS_FAIL, "validation_report.pass_fail must be PASS or FAIL")
+    if "routing_hint" in report:
+        require(report["routing_hint"] in VALID_ROUTING_HINTS, "validation_report.routing_hint is invalid")
 
 
 def validate_stage(stage, payload):
-    ensure_dict(payload)
-
-    accepted_shapes = REQUIRED[stage]
-    found = False
-    for shape in accepted_shapes:
-        value = lookup_path(payload, shape)
-        if value is not None:
-            found = True
-            if stage in {"intent-interpreter", "interview-engine"}:
-                validate_confidence(value, ".".join(shape))
-            if stage == "validator-file-writer" and value not in VALID_PASS_FAIL:
-                raise ValueError("validation.pass_fail must be PASS or FAIL")
-            break
-
-    if not found:
-        readable = " or ".join(".".join(shape) for shape in accepted_shapes)
-        raise ValueError(f"missing required field: {readable}")
+    if stage == "intent-interpreter":
+        validate_intent(payload)
+    elif stage == "interview-engine":
+        validate_interview(payload)
+    elif stage == "specification-builder":
+        validate_specification(payload)
+    elif stage == "execution-planner":
+        validate_plan(payload)
+    elif stage == "artifact-generator":
+        validate_artifact(payload)
+    elif stage == "validator-file-writer":
+        validate_validation(payload)
+    else:
+        raise ValueError(f"unsupported stage: {stage}")
 
 
 def parse_args():

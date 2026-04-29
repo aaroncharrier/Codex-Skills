@@ -1,0 +1,7 @@
+interface:
+  display_name: "Interview Prompt Builder"
+  short_description: "Turn interview answers into prompt files"
+  default_prompt: "Use $interview-prompt-builder to turn the current interview answers into a prompt pack in session_prompts/."
+
+policy:
+  allow_implicit_invocation: true

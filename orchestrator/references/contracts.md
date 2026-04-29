@@ -1,8 +1,8 @@
 # Orchestrator Contracts
 
-## Session State Schema
+Use this file as the compact reference for `session_state`, stage output checks, and rerouting.
 
-Use this strict schema for `session_state`.
+## Session State Schema
 
 ```yaml
 session_state:
@@ -11,34 +11,60 @@ session_state:
   current_stage: INTENT_INTERPRETATION | INTERVIEW_LOOP | SPECIFICATION_GENERATION | EXECUTION_PLANNING | ARTIFACT_GENERATION | VALIDATION
   thresholds:
     confidence_min: number
-    assumption_budget_max: integer
   raw_user_prompt: string
+  rolling_summary:
+    stable_facts: []
+    active_constraints: []
+    current_decisions: []
+    active_assumptions: []
+    unresolved_questions: []
+    last_updated_by_stage: string
   stage_outputs:
     intent_interpreter:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
     interview_engine:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
     specification_builder:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
     execution_planner:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
     artifact_generator:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
     validator_file_writer:
       latest:
+        status:
+        summary:
+        snapshot_path:
       history: []
   latest_valid_artifact:
     present: true | false
+    snapshot_path: string
     content:
   latest_validation:
     present: true | false
+    snapshot_path: string
     pass_fail:
-    issue_type:
+    routing_hint:
   execution_trace:
     - step: integer
       stage: string
@@ -46,7 +72,6 @@ session_state:
       status: SUCCESS | FAILED | BLOCKED
       notes: string
       persisted_to:
-        memory_key: string
         file_path: string
   routing_history:
     - from_stage: string
@@ -65,24 +90,51 @@ session_state:
     validator_file_writer: integer
 ```
 
+Keep `session_state` compact. Prefer `summary` plus `snapshot_path` over storing duplicated raw payloads inline. If file persistence is unavailable, inline the raw payload only as a fallback.
+
+## Mandatory Flow
+
+The orchestrator is a strict state machine. Follow this order unless the current `session_state` already proves that a later stage is the first unsatisfied contract:
+
+1. `INTENT_INTERPRETATION`
+2. `INTERVIEW_LOOP`
+3. `SPECIFICATION_GENERATION`
+4. `EXECUTION_PLANNING`
+5. `ARTIFACT_GENERATION`
+6. `VALIDATION`
+
+Rules:
+
+- Only one stage may be active at a time.
+- A stage may advance only after its raw output has been persisted and its handoff has validated.
+- Do not skip a stage because the request seems obvious, small, or time-sensitive.
+- Do not convert stage payloads into prose when the canonical payload exists.
+- Do not skip `VALIDATION`.
+- If a stage fails, reroute exactly one stage backward using the mapping below.
+
+## Stage Gates
+
+| Stage | Required input | Success output | Failure route |
+| --- | --- | --- | --- |
+| `INTENT_INTERPRETATION` | `raw_user_prompt` and compact `session_state` | `intent` plus `confidence` | `INTERVIEW_LOOP` if ambiguity remains |
+| `INTERVIEW_LOOP` | normalized intent and unresolved questions | interview YAML with `confidence` | `INTERVIEW_LOOP` until ready, then `SPECIFICATION_GENERATION` |
+| `SPECIFICATION_GENERATION` | valid interview handoff | `refined_understanding` and `decision_log` | `INTERVIEW_LOOP` |
+| `EXECUTION_PLANNING` | valid specification handoff | `execution_plan` | `SPECIFICATION_GENERATION` |
+| `ARTIFACT_GENERATION` | valid plan handoff | `artifact`, `artifact_metadata`, `validation_flags` | `EXECUTION_PLANNING` |
+| `VALIDATION` | valid artifact handoff | `validation_report` or terminal handoff | `ARTIFACT_GENERATION` or mapped reroute |
+
 ## Stage Output Expectations
 
 Validate these minimum fields before advancing.
 
 ### Intent Interpreter
 
+Require:
+
 ```yaml
-intent_state:
-  confidence: number
+intent:
+confidence: number
 ```
-
-Recommended fields:
-
-- `resolved_inputs`
-- `resolved_outputs`
-- `constraints`
-- `assumptions`
-- `intent.ambiguity_notes`
 
 ### Interview Engine
 
@@ -93,34 +145,18 @@ interview_result:
   confidence: number
 ```
 
-or a payload whose top-level `confidence` can be read unambiguously.
+or a payload whose top-level `confidence` can be read unambiguously, such as the canonical `interview_questions.yaml` file.
 
-If the interview output contains user-facing questions, require this structure to preserve pass-through delivery:
-
-```yaml
-interview_result:
-  confidence: number
-  questions:
-    - id: string
-      prompt: string
-```
-
-Additional question metadata is allowed, but the Orchestrator must preserve the full YAML payload exactly when presenting it to the user.
-
-If the raw prompt references an external framework, style guide, screenshot, example artifact, prompt template, or best-practices document, treat these as required clarification targets before allowing transition to `SPECIFICATION_GENERATION` unless the interview output already resolves them explicitly.
+If the interview output contains questions, preserve the raw YAML payload exactly when presenting it to the user.
 
 ### Specification Builder
 
 Require:
 
 ```yaml
-final_specification:
+refined_understanding:
+decision_log:
 ```
-
-Optional routing flags:
-
-- `needs_interviewing`
-- `missing_fields`
 
 ### Execution Planner
 
@@ -130,52 +166,42 @@ Require:
 execution_plan:
 ```
 
-Optional planning health flags:
-
-- `incomplete`
-- `invalid`
-
 ### Artifact Generator
 
-Require either:
+Accept either the ready-state artifact payload:
 
 ```yaml
-generated_artifact:
+artifact:
+artifact_metadata:
+validation_flags:
 ```
 
-or:
-
-```yaml
-final_artifact:
-```
-
-Optional generation health flags:
-
-- `missing_inputs`
-- `structural_failure`
-- `validation_flags`
+or the incomplete-state halt payload defined in `artifact-generator/references/contract.md`.
 
 ### Validator File Writer
 
-Require:
+Accept either the ready-state validation payload:
 
 ```yaml
-validation:
+validation_report:
   pass_fail: PASS | FAIL
 ```
 
-Optional issue typing:
+or the handoff payload defined in `validator-file-writer/references/contract.md`.
 
-- `issue_type: spec_issue | plan_issue | artifact_issue | structural_issue`
+Optional:
+
+- `validation_report.routing_hint: spec_issue | plan_issue | artifact_issue | structural_issue | none`
 
 ## Persistence Rules
 
 After every stage attempt:
 
-1. Save the raw stage output under `session_state.stage_outputs.<skill_key>.history`.
-2. Replace `session_state.stage_outputs.<skill_key>.latest` with the newest raw output.
-3. Add an `execution_trace` entry.
-4. If file persistence is enabled, mirror the same output into `.orchestrator-sessions/<session_id>/`.
+1. Persist the raw stage output to `.orchestrator-sessions/<session_id>/`.
+2. Update `session_state.stage_outputs.<skill_key>.latest` with a compact entry.
+3. Append a compact history entry with status, summary, and `snapshot_path`.
+4. Add an `execution_trace` entry.
+5. Validate the next handoff before advancing.
 
 If a stage output is user-facing and structured, persist the exact raw payload before presenting it to the user.
 
@@ -190,7 +216,7 @@ Use stage file keys:
 
 ## Routing Rules
 
-Use this exact mapping:
+Use this mapping when `validation_report.routing_hint` is present:
 
 ```yaml
 rework_rules:
@@ -201,7 +227,15 @@ rework_rules:
     structural_issue: same_skill_retry
 ```
 
-Backward routing must be only one stage at a time.
+If `routing_hint` is missing, derive the reroute from the highest-severity classified issue:
+
+- specification mismatch or unresolved requirement conflict -> `specification-builder`
+- plan or ordering mismatch -> `execution-planner`
+- structural, completeness, or artifact-shape issue -> `artifact-generator`
+
+Backward routing must remain one stage at a time.
+
+If the required persistence, validation, or handoff checks fail, stop and reroute instead of continuing forward.
 
 ## Final Session Result Shape
 
@@ -213,9 +247,11 @@ session_result:
   final_artifact:
     present: true | false
     content:
+    snapshot_path:
   validation:
     present: true | false
     pass_fail:
+    snapshot_path:
   execution_trace:
     - step:
       skill:
@@ -234,3 +270,4 @@ Rules:
 - During `INTERVIEW_LOOP`, display the interview question payload exactly as emitted by `$interview-engine`.
 - Do not convert structured interview YAML into prose.
 - Only emit `session_result` when returning orchestration status rather than active interview questions.
+- When a stage is active, do not answer unrelated user questions outside the current stage payload.

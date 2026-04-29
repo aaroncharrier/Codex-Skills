@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate the strict session_state schema for orchestrator runs.
+Validate the orchestrator session_state schema.
 """
 
 from __future__ import annotations
@@ -53,6 +53,16 @@ def require_key(mapping, key):
     return mapping[key]
 
 
+def validate_compact_stage_entry(entry, label):
+    require(isinstance(entry, dict), f"{label} must be a mapping")
+    if "status" in entry:
+        require(isinstance(entry["status"], str), f"{label}.status must be a string")
+    if "summary" in entry:
+        require(isinstance(entry["summary"], str), f"{label}.summary must be a string")
+    if "snapshot_path" in entry:
+        require(isinstance(entry["snapshot_path"], str), f"{label}.snapshot_path must be a string")
+
+
 def validate_stage_outputs(stage_outputs):
     require(isinstance(stage_outputs, dict), "stage_outputs must be a mapping")
     missing = STAGE_OUTPUT_KEYS - set(stage_outputs.keys())
@@ -63,6 +73,13 @@ def validate_stage_outputs(stage_outputs):
         require("latest" in entry, f"{key}.latest is required")
         history = require_key(entry, "history")
         require(isinstance(history, list), f"{key}.history must be a list")
+        latest = entry["latest"]
+        if isinstance(latest, dict):
+            validate_compact_stage_entry(latest, f"{key}.latest")
+        for index, item in enumerate(history, start=1):
+            require(isinstance(item, (dict, list, str, int, float, bool)) or item is None, f"{key}.history[{index}] has invalid type")
+            if isinstance(item, dict):
+                validate_compact_stage_entry(item, f"{key}.history[{index}]")
 
 
 def validate_trace(execution_trace):
@@ -76,8 +93,9 @@ def validate_trace(execution_trace):
         require(isinstance(require_key(entry, "notes"), str), f"execution_trace[{index}].notes must be a string")
         persisted_to = require_key(entry, "persisted_to")
         require(isinstance(persisted_to, dict), f"execution_trace[{index}].persisted_to must be a mapping")
-        require(isinstance(require_key(persisted_to, "memory_key"), str), f"execution_trace[{index}].persisted_to.memory_key must be a string")
         require(isinstance(require_key(persisted_to, "file_path"), str), f"execution_trace[{index}].persisted_to.file_path must be a string")
+        if "memory_key" in persisted_to:
+            require(isinstance(persisted_to["memory_key"], str), f"execution_trace[{index}].persisted_to.memory_key must be a string")
 
 
 def validate_retry_counters(retry_counters):
@@ -86,6 +104,39 @@ def validate_retry_counters(retry_counters):
     require(not missing, f"retry_counters missing keys: {', '.join(sorted(missing))}")
     for key in STAGE_OUTPUT_KEYS:
         require(isinstance(retry_counters[key], int), f"retry_counters.{key} must be an integer")
+
+
+def validate_rolling_summary(rolling_summary):
+    require(isinstance(rolling_summary, dict), "rolling_summary must be a mapping")
+    for key in ("stable_facts", "active_constraints", "current_decisions", "active_assumptions", "unresolved_questions"):
+        require(isinstance(require_key(rolling_summary, key), list), f"rolling_summary.{key} must be a list")
+    require(isinstance(require_key(rolling_summary, "last_updated_by_stage"), str), "rolling_summary.last_updated_by_stage must be a string")
+
+
+def validate_artifact_pointer(payload, label):
+    require(isinstance(payload, dict), f"{label} must be a mapping")
+    require(isinstance(require_key(payload, "present"), bool), f"{label}.present must be boolean")
+    require("content" in payload or "snapshot_path" in payload, f"{label} requires content or snapshot_path")
+    if "snapshot_path" in payload:
+        require(isinstance(payload["snapshot_path"], str), f"{label}.snapshot_path must be a string")
+
+
+def validate_validation_pointer(payload):
+    require(isinstance(payload, dict), "latest_validation must be a mapping")
+    require(isinstance(require_key(payload, "present"), bool), "latest_validation.present must be boolean")
+    require("pass_fail" in payload, "latest_validation.pass_fail is required")
+    if "snapshot_path" in payload:
+        require(isinstance(payload["snapshot_path"], str), "latest_validation.snapshot_path must be a string")
+    if "routing_hint" in payload:
+        require(isinstance(payload["routing_hint"], str), "latest_validation.routing_hint must be a string")
+
+
+def validate_routing_history(routing_history):
+    require(isinstance(routing_history, list), "routing_history must be a list")
+    for index, entry in enumerate(routing_history, start=1):
+        require(isinstance(entry, dict), f"routing_history[{index}] must be a mapping")
+        for key in ("from_stage", "to_stage", "reason", "trigger"):
+            require(isinstance(require_key(entry, key), str), f"routing_history[{index}].{key} must be a string")
 
 
 def validate(payload):
@@ -102,26 +153,19 @@ def validate(payload):
     confidence_min = require_key(thresholds, "confidence_min")
     require(isinstance(confidence_min, (int, float)), "thresholds.confidence_min must be numeric")
     require(0 <= confidence_min <= 1, "thresholds.confidence_min must be between 0 and 1")
+    if "assumption_budget_max" in thresholds:
+        require(isinstance(thresholds["assumption_budget_max"], int), "thresholds.assumption_budget_max must be an integer")
 
     require(isinstance(require_key(session_state, "raw_user_prompt"), str), "raw_user_prompt must be a string")
 
+    if "rolling_summary" in session_state:
+        validate_rolling_summary(session_state["rolling_summary"])
+
     validate_stage_outputs(require_key(session_state, "stage_outputs"))
-
-    latest_valid_artifact = require_key(session_state, "latest_valid_artifact")
-    require(isinstance(latest_valid_artifact, dict), "latest_valid_artifact must be a mapping")
-    require(isinstance(require_key(latest_valid_artifact, "present"), bool), "latest_valid_artifact.present must be boolean")
-    require("content" in latest_valid_artifact, "latest_valid_artifact.content is required")
-
-    latest_validation = require_key(session_state, "latest_validation")
-    require(isinstance(latest_validation, dict), "latest_validation must be a mapping")
-    require(isinstance(require_key(latest_validation, "present"), bool), "latest_validation.present must be boolean")
-    require("pass_fail" in latest_validation, "latest_validation.pass_fail is required")
-    require("issue_type" in latest_validation, "latest_validation.issue_type is required")
-
+    validate_artifact_pointer(require_key(session_state, "latest_valid_artifact"), "latest_valid_artifact")
+    validate_validation_pointer(require_key(session_state, "latest_validation"))
     validate_trace(require_key(session_state, "execution_trace"))
-
-    routing_history = require_key(session_state, "routing_history")
-    require(isinstance(routing_history, list), "routing_history must be a list")
+    validate_routing_history(require_key(session_state, "routing_history"))
 
     persistence = require_key(session_state, "persistence")
     require(isinstance(persistence, dict), "persistence must be a mapping")
