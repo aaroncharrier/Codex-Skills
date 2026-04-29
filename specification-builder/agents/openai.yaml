@@ -1,4 +1,0 @@
-interface:
-  display_name: "Specification Builder"
-  short_description: "Build strict execution-ready specs"
-  default_prompt: "Use $specification-builder to convert resolved interview outputs into a strict, execution-ready YAML specification."
