@@ -1,151 +1,123 @@
 ---
 name: interview-prompt-builder
-description: Build downstream prompt files from interview-engine sessions by reading `..interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`, using `your_answer` entries and resolved interview output to create prompt files in `session_prompts/`. Use when turning interview results into reusable prompts, prompt packs, or follow-up prompts.
+description: Build downstream prompt files from the lightweight interview snapshot at `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`, falling back to `interview_questions.yaml` only if the snapshot is missing. Use when turning interview results into reusable prompts, prompt packs, or follow-up prompts.
 ---
 
 # Interview Prompt Builder
 
-Use this skill after `interview-engine` has populated `interview_questions.yaml`.
+Use this skill after `interview-engine` has produced `session_state.json`. The snapshot is the source of truth for prompt generation. Do not load the full interview YAML unless the snapshot is missing.
+
+## Input Contract
+
+- Preferred source: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`
+- Fallback source: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`
+- If the snapshot is missing, regenerate it with `scripts/sync_session_state.ps1` before building the prompt. If the shell blocks `.ps1` execution, invoke it with `powershell -ExecutionPolicy Bypass -File`.
+- Read only the compact snapshot data needed for the prompt.
 
 ## Workflow
 
-1. Open the active session's `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`.
-2. Treat the top-level `output` block and every non-empty `questions[].your_answer` as the source of truth.
+1. Open the session's `session_state.json`.
+2. Treat the top-level `confidence`, `assumption_lines`, `output_lines`, and every non-empty `questions[].your_answer` as the source of truth.
 3. Carry answered text into the prompt verbatim when it adds precision. Paraphrase only when it makes the prompt clearer.
 4. Keep unresolved questions out of the main prompt and place them in a separate follow-up prompt.
-5. Write the generated files to `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/` inside the same session folder.
-6. Overwrite only the files you generate. Do not rewrite the interview YAML.
+5. Write the generated files to `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/`.
+6. Overwrite only the files you generate. Do not rewrite the interview YAML or the snapshot.
 
 ## Default outputs
 
-- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/prompt.md`: the main downstream prompt.
-- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/follow-up.md`: only when unanswered questions remain.
+- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/prompt.md`
+- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/follow-up.md` only when unanswered questions remain.
 
 ## Prompt composition
 
 Include:
 
-1. Objective Context (Why this exists)
-  - Anchors the model in intent—not just mechanics.
-  - What are we solving?
-  - Why does it matter?
-  - What does success unlock downstream?
-  - Prevents local optimization (“just write SQL”) vs global optimization (“fit for reporting pipeline”).
+1. Objective Context
+  - Why this exists
+  - What problem we are solving
+  - Why it matters downstream
 
-2. Artifact Contract (What must be produced)
-  - Defines the output as a first-class artifact, not text.
-  - File type(s)
-  - Naming conventions
-  - Schema / structure
+2. Artifact Contract
+  - File type
+  - Naming
+  - Schema or structure
   - Storage location
-  - Forces Codex to think in deliverables, not prose
 
-3. Input Contract (What is allowed)
-  - Constrains the model’s working set.
-  - Allowed inputs (files, schemas, APIs)
+3. Input Contract
+  - Allowed inputs
   - Disallowed assumptions
   - Data boundaries
-  - Reduces hallucination and token waste
 
-4. Constraints & Invariants (What must always be true)
-  - Hard rules that cannot be violated.
+4. Constraints and Invariants
+  - Hard rules
   - Formatting rules
-  - Performance constraints
   - Naming rules
   - Idempotency requirements
-  - This is where most prompts are weak
 
-5. Execution Model (How to think)
-  - Controls reasoning approach without verbosity bloat
+5. Execution Model
   - Step ordering
-  - Required checks before proceeding
+  - Required checks
   - Deterministic vs exploratory behavior
-  - Replaces vague “think step by step” with structured cognition
 
-6. State & Memory Model (What persists across steps)
-  - Critical for multi-step / orchestrated systems
-  - What gets written to disk
-  - What gets reused
+6. State and Memory Model
+  - What persists
+  - What is written to disk
   - What is ephemeral
-  - Enables system-level coherence, not one-off outputs
 
-7. Decomposition Strategy (How to break the problem down)
-  - Forces modular thinking
+7. Decomposition Strategy
   - Subtasks
   - Boundaries between steps
   - No cross-responsibility rules
-  - Mirrors your skill-based architecture
 
-8. Validation Criteria (What “correct” means)
-  - Defines success before generation
+8. Validation Criteria
   - Structural validation
   - Logical validation
   - Edge cases
-  - Prevents “looks right” outputs
 
-9. Test Cases / Examples (Ground truth anchors)
-  - Used sparingly but strategically
-  - Known good inputs/outputs
-  - Edge cases
+9. Test Cases and Examples
+  - Use sparingly
+  - Known good inputs and outputs
   - Anti-patterns
-  - High leverage, high token cost—use intentionally
 
-10. Failure Modes & Recovery Rules
-  - Principal-level prompts anticipate failure
+10. Failure Modes and Recovery Rules
   - What to do if input is incomplete
   - What to do if constraints conflict
   - When to stop vs proceed
-  - This is a major differentiator vs mid-level prompts
 
-11. Scope Boundaries (What NOT to do)
-  - Explicitly restricts behavior
+11. Scope Boundaries
   - No extra features
   - No assumption expansion
   - No format drift
-  - Prevents scope creep (huge for your system)
 
 12. Output Formatting Contract
-  - Removes ambiguity at the final step
-  - Exact structure (JSON, YAML, SQL, etc.)
+  - Exact structure
   - Ordering rules
-  - Required/optional fields
-  - Makes outputs machine-consable
+  - Required and optional fields
 
-13. Tooling & Execution Interface
-  - How Codex interacts with the environment
+13. Tooling and Execution Interface
   - Scripts to call
   - File operations allowed
-  - No direct inline generation vs required
-  - Critical for file-based workflows (your direction)
+  - No direct inline generation when a file-based workflow is required
 
 14. Token Efficiency Strategy
-  - Principal engineers design for cost
-  - Avoid duplication across sections
-  - Reference vs restate
-  - Minimize examples
+  - Avoid duplication
+  - Reference instead of restating
   - Prefer schemas over prose
-  - This is rarely formalized—but should be
 
 15. Determinism Strategy
-  - Ensures repeatable outputs
   - No randomness
   - Stable ordering
   - Explicit defaults
-  - Essential for production use
 
-16. Integration Context (Where this fits)
-  - Connects the prompt to the larger system
+16. Integration Context
   - Upstream dependencies
   - Downstream consumers
   - Interface expectations
-  - Prevents “locally correct, globally useless”
 
-17. Termination Criteria (When the task is done)
-  - Defines completion explicitly
+17. Termination Criteria
   - All files written
-  - All validations passed
+  - Validations passed
   - No pending ambiguity
-  - Eliminates partial outputs
 
 Do not:
 
@@ -159,4 +131,4 @@ Do not:
 - Keep the main prompt concise and actionable.
 - Preserve the session's terminology.
 - Make the prompt ready to paste into the next Codex stage or agent.
-- If the session is still incomplete, make the follow-up prompt ask only for the missing answers.
+- If the session is still incomplete, make `follow-up.md` ask only for the missing answers.
