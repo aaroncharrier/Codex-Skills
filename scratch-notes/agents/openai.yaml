@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scratch Notes"
+  short_description: "Capture quick scratch task notes"
+  default_prompt: "Use $scratch-notes to capture this quick reminder in scratch-notes.md with the fixed bullet schema."

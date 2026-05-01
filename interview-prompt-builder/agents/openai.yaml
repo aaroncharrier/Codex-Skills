@@ -1,7 +1,7 @@
 interface:
   display_name: "Interview Prompt Builder"
   short_description: "Turn the compact interview snapshot into prompt files"
-  default_prompt: "Use $interview-prompt-builder to turn the current `session_state.json` into `session_prompts/prompt.md`, and `follow-up.md` only if some answers are still missing. If the shell blocks `.ps1` execution, run the helper with `powershell -ExecutionPolicy Bypass -File`."
+  default_prompt: "Use $interview-prompt-builder to turn the current `interview_output.json` into `prompt-<yyyy-MM-dd_HH-mm-ss>.md`."
 
 policy:
   allow_implicit_invocation: true

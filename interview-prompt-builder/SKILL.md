@@ -1,32 +1,30 @@
 ---
 name: interview-prompt-builder
-description: Build downstream prompt files from the lightweight interview snapshot at `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`, falling back to `interview_questions.yaml` only if the snapshot is missing. Use when turning interview results into reusable prompts, prompt packs, or follow-up prompts.
+description: Build downstream prompt file from interview output at `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_output.json`. Use when turning interview results into prompts. Never build a prompt from an unresolved interview or the raw user request alone.
 ---
 
 # Interview Prompt Builder
 
-Use this skill after `interview-engine` has produced `session_state.json`. The snapshot is the source of truth for prompt generation. Do not load the full interview YAML unless the snapshot is missing.
+Use this skill after `interview-engine` has produced `interview_output.json`. The snapshot is the source of truth for prompt generation.
 
 ## Input Contract
 
-- Preferred source: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`
-- Fallback source: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`
-- If the snapshot is missing, regenerate it with `scripts/sync_session_state.ps1` before building the prompt. If the shell blocks `.ps1` execution, invoke it with `powershell -ExecutionPolicy Bypass -File`.
-- Read only the compact snapshot data needed for the prompt.
+- source: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_output.json`
 
 ## Workflow
 
-1. Open the session's `session_state.json`.
-2. Treat the top-level `confidence`, `assumption_lines`, `output_lines`, and every non-empty `questions[].your_answer` as the source of truth.
-3. Carry answered text into the prompt verbatim when it adds precision. Paraphrase only when it makes the prompt clearer.
-4. Keep unresolved questions out of the main prompt and place them in a separate follow-up prompt.
-5. Write the generated files to `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/`.
-6. Overwrite only the files you generate. Do not rewrite the interview YAML or the snapshot.
+1. You are an expert at writing Codex prompts.
+1. Use `Read-OutputJson.ps1` to read the session's `interview_output.json`.
+2. Generate the `prompt-<yyyy-MM-dd_HH-mm-ss>.md`
 
-## Default outputs
+## Guardrails
 
-- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/prompt.md`
-- `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/follow-up.md` only when unanswered questions remain.
+- Do not synthesize missing requirements from the original request when the snapshot is incomplete.
+- Do not read anything excpt the `interview_output.json` file.
+
+## Output Contract
+
+- `interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/prompt-<yyyy-MM-dd_HH-mm-ss>.md`
 
 ## Prompt composition
 
@@ -131,4 +129,3 @@ Do not:
 - Keep the main prompt concise and actionable.
 - Preserve the session's terminology.
 - Make the prompt ready to paste into the next Codex stage or agent.
-- If the session is still incomplete, make `follow-up.md` ask only for the missing answers.

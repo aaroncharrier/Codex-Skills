@@ -1,0 +1,7 @@
+interface:
+  display_name: "Interview Prompt Flow"
+  short_description: "Orchestrate interview-to-prompt handoffs"
+  default_prompt: "Use $interview-prompt-flow to run $interview-engine first, then hand off to $interview-prompt-builder and generate follow-up prompts when the interview is still incomplete."
+
+policy:
+  allow_implicit_invocation: true
