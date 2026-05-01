@@ -1,61 +1,37 @@
 ---
 name: interview-engine
-description: Resolve ambiguity in a user request through a YAML-backed requirements interview stored in `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`. Use when Codex needs only the highest-impact clarifications before downstream execution.
+description: Resolve ambiguity in prompt-generation and other requests through a JSON-backed requirements interview stored in `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.JSON`.
 ---
 
 # Interview Engine
 
-Resolve only the ambiguity that would change the artifact. Keep `interview_questions.yaml` as the canonical record and mirror the current state into a compact snapshot for downstream prompt building.
+Ask an excessive amount of questions until we have a complete understanding of the user request. Follow the workflow until you have a complete understanding.
+
+## Guardrails
+
+- Ask at least 2 rounds of questions
+- Ask at least 20 questions in total
 
 ## Handoff Contract
 
-- Canonical file: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`
-- Compact snapshot: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_state.json`
-- Downstream prompt files: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/session_prompts/prompt.md` and `follow-up.md`
-- The snapshot must contain only the current active answer block plus the resolved summary fields needed by the builder.
-
-```json
-{
-  "session_name": "session-<yyyy-MM-dd_HH-mm-ss>",
-  "source": ".../interview_questions.yaml",
-  "confidence": 0.0,
-  "ready_for_handoff": false,
-  "assumption_lines": [],
-  "output_lines": [],
-  "questions": [
-    {
-      "question_id": "Q1",
-      "question": "",
-      "your_answer": ""
-    }
-  ]
-}
-```
-
-## Token Contract
-
-- Do not load the full YAML into context.
-- Do not reread historical questions once they have been resolved into `session_state.json`.
-- Only inspect the active answer block after `# === ACTIVE_ANSWER_BLOCK_START ===` plus the minimal surrounding structure needed for a safe patch.
-- Keep commentary minimal.
+- Canonical file: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.json`
+- interview output: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_output.json`
+- interview answers: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/question_answers.json`
 
 ## Workflow
 
-1. Identify missing or weakly defined information in:
-   - requirements
-   - inputs
-   - outputs
-   - references
-   - constraints
-   - success criteria
-   - Codex personality
-   - external framework or template alignment
-2. Generate an internal pool of candidate questions.
-3. Ask only the smallest useful batch of high-leverage questions.
-4. After the user responds, patch only the active answer block and the derived summary fields.
-5. Run `scripts/sync_session_state.ps1` to refresh `session_state.json` from the YAML file. If the shell blocks `.ps1` execution, invoke it with `powershell -ExecutionPolicy Bypass -File`.
-6. Recalculate confidence after every answer batch.
-7. Stop the interview at `confidence >= 0.95` once blocking ambiguity is resolved, then hand off to `interview-prompt-builder` using the snapshot.
+1. Generate a set of questions to ask the user.
+2. Use the `Write-InterviewJson.ps1` script to write the questions.
+3. emit `I updated the session-<yyyy-MM-dd_HH-mm-ss> JSON file.` in the chat session.
+4. Stop until user aknowledges questions are answered.
+5. Run `Extract-QuestionAnswers.ps1`
+6. Read `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/question_answers.json`
+7. If guardrails are meet and you have a complete understanding execute the `Write-OutputJson.ps1` and exit skill
+8. If more questions are needed start step 1.
+
+## Token Contract
+
+- Only emit `I updated the session-<yyyy-MM-dd_HH-mm-ss> JSON file.` in the chat
 
 ## Question Design
 
@@ -64,6 +40,7 @@ Every question must:
 - be specific and actionable
 - make the reason for asking visible
 - reduce future questioning effort
+- entice the user for elaboration
 
 Use these question types:
 - `one_of` for mutually exclusive choices
@@ -82,78 +59,60 @@ For each question, always provide:
 ## Scope
 
 Do:
-
 - capture missing requirements, inputs, outputs, references, constraints, success criteria, Codex personality, or external reference rules
-- record questions and answers in the YAML file
-- keep `session_state.json` current as the compact handoff artifact
+- ask clarifying questions
 - increase confidence only when ambiguity actually decreases
 
 Do not:
-
 - plan, design, validate, or generate deliverables
+- draft prompt content in chat before handoff
 - explain questions in chat
 - reread historical blocks beyond the active answer block
 
 ## File Contract
 
-- Path: `.interview-prompt-builder/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.yaml`
-- Create the file if it is missing.
-- Patch in place otherwise.
-- Keep the file valid YAML.
+- Path: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.json`
 - Preserve every existing `your_answer`.
 
-```yaml
-confidence: 0.0-1.0
-assumptions:
-  - id: A1
-    statement: ""
-output:
-  resolved_inputs: []
-  resolved_outputs: []
-  constraints: []
-  decisions: []
-  assumptions: []
-  codex_personality: []
-  success_criteria: []
-questions:
-  - question_id: Q1
-    question: ""
-    type: one_of | multi_select | freeform | ranking | numeric
-    context: ""
-    why_it_matters: ""
-    example_answers:
-      - ""
-    recommended_answer: ""
-    your_answer: ""
-# === ACTIVE_ANSWER_BLOCK_START ===
+```JSON
+{
+  "confidence": 0.0-1.0,
+  "assumptions":
+    [
+      "",
+    ],
+  "output": {
+    "resolved_inputs": [""],
+    "resolved_outputs": [""],
+    "constraints": [""],
+    "decisions": [""],
+    "assumptions": [""],
+    "codex_personality": [""],
+    "success_criteria": [""]
+    },
+  "questions": [
+    {"question": "",
+      "type": ["one_of", "multi_select", "freeform", "ranking", "numeric"],
+      "context": "",
+      "why_it_matters": "",
+      "example_answers": [""],
+      "recommended_answer": "",
+      "your_answer": ""
+    }
+  ]
+}
 ```
 
-## Write Rules
+- Path: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_output.json`
 
-- Move the marker to the first newly appended question.
-- Append only new questions.
-- Update only `confidence`, affected assumptions, and `output` fields derived from new answers.
-- Keep question ids monotonic.
-- Keep the snapshot file in lockstep with the YAML file.
-
-## Question Rules
-
-Ask only if the answer could change:
-
-- artifact structure or file targets
-- required inputs or references
-- constraints or acceptance criteria
-- validation behavior
-- how success is measured
-- personality Codex should assume
-- external template or framework alignment
-
-Prefer `one_of`, `multi_select`, or `numeric` when they fit. Defer lower-impact questions.
-
-## Completion
-
-Stop when `confidence >= 0.95` and blocking ambiguity is resolved.
-
-On non-terminal turns, output only:
-
-`I updated the session-<yyyy-MM-dd_HH-mm-ss> YAML file and session_state.json with additional questions.`
+```JSON
+{
+    "resolved_inputs": [""],
+    "resolved_outputs": [""],
+    "constraints": [""],
+    "decisions": [""],
+    "assumptions": [""],
+    "codex_personality": [""],
+    "success_criteria": [""]
+    }
+```

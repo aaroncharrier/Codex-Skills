@@ -1,7 +1,7 @@
 interface:
   display_name: "Interview Engine"
-  short_description: "Refine inputs with structured questions and a compact session snapshot"
-  default_prompt: "Use $interview-engine to refine this request by asking the highest-leverage clarifying questions in strict YAML. Keep `session_state.json` synced after each answer batch, running the helper with `powershell -ExecutionPolicy Bypass -File` if the shell blocks `.ps1` execution. Stop at 0.95 confidence and hand off to $interview-prompt-builder when the request is ready."
+  short_description: "Refine inputs with structured questions and a compact output. Use to ask user questions to fully understand a task."
+  default_prompt: "Use $interview-engine to refine this request by asking the highest-leverage clarifying questions in strict JSON. Stop when you have a complete understanding."
 
 policy:
   allow_implicit_invocation: true

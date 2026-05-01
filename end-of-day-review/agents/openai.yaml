@@ -1,0 +1,4 @@
+interface:
+  display_name: "End Of Day Review"
+  short_description: "Capture a factual weekly work log"
+  default_prompt: "Use $end-of-day-review to gather approved evidence, interview me about gaps, and merge today's confirmed work into my weekly log."
