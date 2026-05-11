@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Bootstrap"
+  short_description: "Bootstrap solo analytics projects"
+  default_prompt: "Use $project-bootstrap to initialize a lightweight analytics or data-engineering project in this Codex workspace."
