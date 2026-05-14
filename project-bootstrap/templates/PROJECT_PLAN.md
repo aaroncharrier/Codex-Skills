@@ -372,7 +372,7 @@ Use one table per phase so execution details stay readable.
 | `[Pipeline success rate]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
 | `[Freshness SLA attainment]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
 
-### Adoption / Business Success
+### Business Success
 
 | Metric | Target | Measurement Method | Owner | Reporting Cadence |
 | --- | --- | --- | --- | --- |
@@ -384,24 +384,14 @@ Use one table per phase so execution details stay readable.
 
 ### Team & Roles
 
-| Role | Name | Team | Allocation | Responsibility |
-| --- | --- | --- | --- | --- |
-| Sponsor | `[Name]` | `[Team]` | `[10%]` | `[Responsibility]` |
-| Product / Analytics Lead | `[Name]` | `[Team]` | `[20%]` | `[Responsibility]` |
-| Data Engineer | `[Name]` | `[Team]` | `[50%-100%]` | `[Responsibility]` |
-| Analytics Engineer | `[Name]` | `[Team]` | `[50%-100%]` | `[Responsibility]` |
-| BI Developer / Analyst | `[Name]` | `[Team]` | `[25%-50%]` | `[Responsibility]` |
-| Data Steward / QA | `[Name]` | `[Team]` | `[10%-25%]` | `[Responsibility]` |
-
-### RACI
-
-| Workstream | Responsible | Accountable | Consulted | Informed |
-| --- | --- | --- | --- | --- |
-| Requirements & scope | `[Name]` | `[Name]` | `[Name(s)]` | `[Name(s)]` |
-| Data ingestion | `[Name]` | `[Name]` | `[Name(s)]` | `[Name(s)]` |
-| Data modeling | `[Name]` | `[Name]` | `[Name(s)]` | `[Name(s)]` |
-| Validation & UAT | `[Name]` | `[Name]` | `[Name(s)]` | `[Name(s)]` |
-| Rollout & support | `[Name]` | `[Name]` | `[Name(s)]` | `[Name(s)]` |
+| Role | Name | Team | Responsibility |
+| --- | --- | --- | --- |
+| Sponsor | `[Name]` | `[Team]` | `[Responsibility]` |
+| Product / Analytics Lead | `[Name]` | `[Team]` | `[Responsibility]` |
+| Data Engineer | `[Name]` | `[Team]` | `[Responsibility]` |
+| Analytics Engineer | `[Name]` | `[Team]` | `[Responsibility]` |
+| BI Developer / Analyst | `[Name]` | `[Team]` | `[Responsibility]` |
+| Data Steward / QA | `[Name]` | `[Team]` | `[Responsibility]` |
 
 ### Tooling / Environment Needs
 

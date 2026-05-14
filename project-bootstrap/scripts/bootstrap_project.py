@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Deterministically bootstrap a lightweight analytics or data-engineering project.
+Deterministically scaffold a project by creating folders and copying template files.
 
 Usage:
-    python .\scripts\bootstrap_project.py C:\path\to\project --project-name "My Project" --owner "Owner Name"
+    python .\scripts\bootstrap_project.py C:\path\to\project
 """
 
 from __future__ import annotations
 
 import argparse
-from datetime import date
 from pathlib import Path
+import shutil
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
@@ -40,6 +40,7 @@ FILE_TARGETS = [
     ("templates/METRIC_DEFINITION_SIMPLE_TEMPLATE.md", "docs/Data Documents/METRIC_DEFINITION_SIMPLE_TEMPLATE.md"),
     ("templates/METRIC_DEFINITION_TEMPLATE.md", "docs/Data Documents/METRIC_DEFINITION_TEMPLATE.md"),
     ("templates/METRIC_DICTIONARY_TEMPLATE.md", "docs/Data Documents/METRIC_DICTIONARY_TEMPLATE.md"),
+    ("templates/OPEN_QUESTIONS_AND_DECISIONS_LOG.md", "docs/OPEN_QUESTIONS_AND_DECISIONS_LOG.md"),
     ("templates/RUNBOOK_SUPPORT_TEMPLATE.md", "docs/Data Documents/RUNBOOK_SUPPORT_TEMPLATE.md"),
     ("questionnaires/AGENTS.QUESTIONNAIRE.md", "docs/questionnaires/AGENTS.QUESTIONNAIRE.md"),
     ("questionnaires/WORK_LOG.QUESTIONNAIRE.md", "docs/questionnaires/WORK_LOG.QUESTIONNAIRE.md"),
@@ -47,26 +48,18 @@ FILE_TARGETS = [
     ("questionnaires/DATA_QUALITY_AND_RECONCILIATION_PLAN_QUESTIONNAIRE.md", "docs/Data Documents/DATA_QUALITY_AND_RECONCILIATION_PLAN_QUESTIONNAIRE.md"),
     ("questionnaires/OPEN_QUESTIONS_AND_DECISIONS_LOG_QUESTIONNAIRE.md", "docs/questionnaires/OPEN_QUESTIONS_AND_DECISIONS_LOG_QUESTIONNAIRE.md"),
     ("questionnaires/PRD_QUESTIONNAIRE.md", "docs/questionnaires/PRD_QUESTIONNAIRE.md"),
-    ("questionnaires/RUNBOOK_SUPPORT_QUESTIONNAIRE.md", "docs/Data Documents/RUNBOOK_SUPPORT_QUESTIONNAIRE.md")
-    ("questionnaires/SRD_QUESTIONNAIRE.md", "docs/questionnaires/SRD_QUESTIONNAIRE.md")
+    ("questionnaires/RUNBOOK_SUPPORT_QUESTIONNAIRE.md", "docs/Data Documents/RUNBOOK_SUPPORT_QUESTIONNAIRE.md"),
+    ("questionnaires/SRD_QUESTIONNAIRE.md", "docs/questionnaires/SRD_QUESTIONNAIRE.md"),
 ]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Bootstrap a lightweight analytics or data-engineering project.",
+        description="Create a project scaffold by copying the bundled template pack.",
     )
     parser.add_argument(
         "output_dir",
         help="Explicit output directory for the generated project.",
-    )
-    parser.add_argument(
-        "--project-name",
-        help="Project name used in generated documents. Defaults to the output folder name.",
-    )
-    parser.add_argument(
-        "--owner",
-        help='Owner name used in generated documents. Defaults to "TBD".',
     )
     parser.add_argument(
         "--force",
@@ -83,11 +76,24 @@ def windows_rel(path: Path, root: Path, is_directory: bool = False) -> str:
     return rel
 
 
-def render_template(text: str, context: dict[str, str]) -> str:
-    rendered = text
-    for key in sorted(context):
-        rendered = rendered.replace("{{" + key + "}}", context[key])
-    return rendered
+def validate_sources(skill_root: Path) -> None:
+    missing: list[str] = []
+    invalid: list[str] = []
+
+    for source_relative, _ in FILE_TARGETS:
+        source_path = skill_root / source_relative
+        if not source_path.exists():
+            missing.append(source_relative)
+        elif source_path.is_dir():
+            invalid.append(source_relative)
+
+    if missing or invalid:
+        problems: list[str] = []
+        if missing:
+            problems.extend(f"Missing source file: {item}" for item in missing)
+        if invalid:
+            problems.extend(f"Expected file but found directory: {item}" for item in invalid)
+        raise FileNotFoundError("\n".join(problems))
 
 
 def ensure_directory(target: Path, root: Path, summary: list[str]) -> None:
@@ -104,13 +110,8 @@ def write_file(
     target_path: Path,
     root: Path,
     force: bool,
-    context: dict[str, str],
     summary: list[str],
 ) -> None:
-    if not source_path.exists():
-        raise FileNotFoundError(f"Template source not found: {source_path}")
-    if source_path.is_dir():
-        raise IsADirectoryError(f"Template source must be a file: {source_path}")
     if target_path.exists() and target_path.is_dir():
         raise IsADirectoryError(f"Target path is a directory: {target_path}")
 
@@ -119,10 +120,8 @@ def write_file(
         summary.append(f"SKIPPED {windows_rel(target_path, root)}")
         return
 
-    content = source_path.read_text(encoding="utf-8")
-    rendered = render_template(content, context)
     target_path.parent.mkdir(parents=True, exist_ok=True)
-    target_path.write_text(rendered, encoding="utf-8")
+    shutil.copyfile(source_path, target_path)
 
     line = f"CREATED {windows_rel(target_path, root)}"
     if existed and force:
@@ -134,17 +133,8 @@ def main() -> int:
     args = parse_args()
 
     output_dir = Path(args.output_dir).expanduser().resolve()
+    validate_sources(SKILL_ROOT)
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    project_name = (args.project_name or output_dir.name or "New Project").strip()
-    owner = (args.owner or "TBD").strip()
-    last_updated = date.today().isoformat()
-
-    context = {
-        "LAST_UPDATED": last_updated,
-        "OWNER": owner or "TBD",
-        "PROJECT_NAME": project_name or "New Project",
-    }
 
     summary: list[str] = []
 
@@ -157,7 +147,6 @@ def main() -> int:
             output_dir / target_relative,
             output_dir,
             args.force,
-            context,
             summary,
         )
 

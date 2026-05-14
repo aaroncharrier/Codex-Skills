@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Initiation PM"
+  short_description: "Interview and populate a new project package"
+  default_prompt: "Use $project-initiation-pm after $project-bootstrap to read referenced docs first, interview me 3 questions at a time, populate the scaffold directly, and clean up unused BRD/PRD/SRD files for shorter projects."
