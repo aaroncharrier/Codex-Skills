@@ -1,31 +1,30 @@
 ---
 name: project-bootstrap
-description: Bootstrap lightweight, one-person analytics and data-engineering projects with a deterministic local script, role-specific agent guidance, and questionnaire-driven project docs. Use when Codex needs to initialize a new Codex project folder with `README.md`, `AGENTS.md`, role files, `docs/PROJECT_PLAN.md`, `docs/WORK_LOG.md`, `docs/questionnaires/`, and an empty `repo/`, then update those generated documents after the user fills in the questionnaires.
+description: Deterministically create a new analytics or data-engineering project scaffold by creating the target folder and copying the bundled template pack into its existing layout. Use when Codex needs to initialize a new Codex project from the packaged root docs, role files, BRD/PRD/SRD templates, data-document templates, questionnaires, and an empty `repo/` with Windows-only behavior, minimal LLM involvement, overwrite protection via `--force`, and no runtime document editing or questionnaire processing.
 ---
 
 # Project Bootstrap
 
 ## Overview
 
-Use this skill to initialize a lightweight analytics or data-engineering project without turning the setup into a heavyweight process. Start with the deterministic bootstrap script, then use the copied questionnaires to gather real project details before updating the generated documents.
+Use this skill to create a new project scaffold from the current bundled template pack. The skill is script-first and stops after deterministic folder creation and file copying.
 
-Version 1 is Windows-only.
+This skill is Windows-only.
 
 ## Required Workflow
 
-1. Run `scripts/bootstrap_project.py` first. Do not hand-create the target project files when the script can create them deterministically.
-2. Pass an explicit output directory. Use `--project-name` and `--owner` when the user already knows them.
-3. Review the `CREATED` and `SKIPPED` summary to confirm the expected root-versus-`docs` layout.
-4. Tell the user to fill in the copied questionnaires under `docs\questionnaires`.
-5. After the user confirms the questionnaires are complete, read the answers and update the generated documents in the same invocation.
-6. When editing generated documents later, set a real current date in that document's `Last updated` metadata.
+1. Run `scripts/bootstrap_project.py` first. Do not hand-create the scaffold when the script can copy it deterministically.
+2. Pass an explicit output directory. The script creates the target folder if it does not already exist.
+3. Use `--force` only when the user explicitly wants existing scaffold files overwritten.
+4. Review the `CREATED` and `SKIPPED` summary to confirm the expected layout.
+5. Stop after scaffold creation. Do not interpret questionnaire answers, synthesize document content, or continue into follow-up document updates as part of this skill.
 
 ## Bootstrap Command
 
 Use PowerShell-style examples when showing the command:
 
 ```powershell
-python .\scripts\bootstrap_project.py C:\path\to\project --project-name "My Project" --owner "Owner Name"
+python .\scripts\bootstrap_project.py C:\path\to\project
 ```
 
 Use `--force` only when the user explicitly wants existing files overwritten:
@@ -38,13 +37,14 @@ python .\scripts\bootstrap_project.py C:\path\to\project --force
 
 `scripts/bootstrap_project.py` is standard-library only and deterministic. It:
 
-- Creates `docs\`, `docs\questionnaires\`, `docs/BRD PRD SRD`, `docs/Data Documents`, and `repo\` if they do not already exist.
-- Copies template files into the project root and `docs\`.
-- Copies questionnaire working copies into `docs\questionnaires\`.
-- Copies data and metric documents into `docs/Data Documents`.
-- Copies the BRP, PRD, and SRP templates into `docs/BRD PRD SRD`.
+- Validates that every expected source template and questionnaire file exists before copying.
+- Creates `docs\`, `docs\questionnaires\`, `docs\BRD PRD SRD`, `docs\Data Documents`, and `repo\` if they do not already exist.
+- Copies the full current template pack into the target project with a fixed explicit source-to-target manifest.
+- Copies templates unchanged. Placeholder tokens such as `{{PROJECT_NAME}}`, `{{OWNER}}`, and `{{LAST_UPDATED}}` remain untouched if they exist in source files.
 - Refuses to overwrite existing files unless `--force` is provided.
+- Proceeds safely in existing non-empty folders by copying missing scaffold files and skipping existing ones unless `--force` is used.
 - Prints stable plain-text summary lines labeled `CREATED` or `SKIPPED`.
+- Stops after copying. It does not read, interpret, or update any copied documents.
 
 ## Generated Layout
 
@@ -60,7 +60,8 @@ The generated project layout is:
   docs/
     PROJECT_PLAN.md
     WORK_LOG.md
-    BRD PRD SRP/
+    OPEN_QUESTIONS_AND_DECISIONS_LOG.md
+    BRD PRD SRD/
       BRD_TEMPLATE.md
       PRD_TEMPLATE.md
       SRD_TEMPLATE.md
@@ -75,8 +76,8 @@ The generated project layout is:
       RUNBOOK_SUPPORT_TEMPLATE.md
       RUNBOOK_SUPPORT_QUESTIONNAIRE.md
     questionnaires/
-      AGENTS.questionnaire.md
-      WORK_LOG.questionnaire.md
+      AGENTS.QUESTIONNAIRE.md
+      WORK_LOG.QUESTIONNAIRE.md
       BRD_QUESTIONNAIRE.md
       PRD_QUESTIONNAIRE.md
       SRD_QUESTIONNAIRE.md
@@ -90,23 +91,20 @@ Keep this layout exact. Do not create extra planning files unless the user expli
 
 - `scripts/bootstrap_project.py`: deterministic bootstrapper
 - `templates/`: source markdown templates copied into the target project
-- `questionnaires/`: working questionnaire copies placed under `docs\questionnaires`
+- `questionnaires/`: passive scaffold assets copied into `docs\questionnaires` and `docs\Data Documents` according to the fixed manifest
 
-## Questionnaire Update Pass
+## Passive Assets
 
-After the user fills in the questionnaires:
+Questionnaires, role files, and templates remain in the scaffold as project assets, but this skill does not act on them after copying.
 
-1. Read the seven files under `docs\questionnaires`.
-2. Update `README.md` with factual business context, setup, data sources, outputs, environments, ownership, and links.
-3. Update `AGENTS.md` with the real tech stack, commands, guardrails, and workflow expectations.
-4. Update `docs\PROJECT_PLAN.md` with the actual goal, scope, phases, milestones, dependencies, risks, decisions, open questions, and acceptance criteria.
-4. Update `docs\BRD_TEMPLATE.md`, `docs\PRD_TEMPLATE.md`, and `docs\SRD_TEMPLATE.md` with the actual goal, scope, phases, milestones, dependencies, risks, decisions, open questions, and acceptance criteria.
-5. Update `docs\WORK_LOG.md` only if the user has supplied a real work-log entry. Otherwise leave the starter placeholder intact.
-6. Keep `README.md` human-facing, `AGENTS.md` agent-facing, and `docs\WORK_LOG.md` append-only.
+- Do not tell the user to fill questionnaires as part of this skill workflow.
+- Do not read questionnaire answers during scaffold creation.
+- Do not mutate any copied files during scaffold creation.
 
 ## Maintenance Rules
 
-- Keep the skill small, deterministic, and easy to maintain.
-- Keep decisions and open questions inside `docs\PROJECT_PLAN.md`.
-- Do not add `DECISIONS.md`, `OPEN_QUESTIONS.md`, `CODING_AGENT.md`, or other extra bootstrap artifacts unless the user explicitly requests them.
+- Keep the skill narrow, deterministic, and easy to validate.
+- Keep the current file inventory, template contents, and target placement unchanged unless the user explicitly asks for a scaffold change.
+- Keep `scripts/bootstrap_project.py` script-first with a fixed explicit copy manifest.
 - If you change a template or questionnaire path, update the file map in `scripts/bootstrap_project.py` in the same edit.
+- If you change the scope again, update `agents/openai.yaml` so the UI metadata stays aligned with the skill behavior.
