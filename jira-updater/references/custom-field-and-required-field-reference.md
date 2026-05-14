@@ -1,31 +1,46 @@
 # Custom Field and Required Field Reference
 
-Use this file for generic Jira field behavior. Treat live Atlassian MCP metadata as the authority whenever it is available.
+Use this file for generic Jira Cloud field behavior in the loader.
 
 ## Required-Field Policy
 
-- For create actions, enforce only Jira-required fields reported by live metadata when that capability exists.
-- If live metadata is unavailable, fall back to the safe minimum contract: project, issue type, summary, and parent issue for Sub-tasks.
-- Do not treat template placeholders marked `[Required]` as automatic Jira-required fields.
-- For update actions, patch only the fields the user explicitly supplies. Leave all other Jira fields unchanged.
+- For create requests, rely on Jira create metadata when credentials are available.
+- If live metadata reports a required field that the artifact does not populate, stop before mutation.
+- If live metadata is unavailable, local validation should still enforce the artifact contract only.
+- For update requests, patch only the fields the file explicitly supplies plus `clear_fields`.
 
-## Known Field IDs
+## Curated Fields
 
-| Jira Field | Purpose | Notes |
-| --- | --- | --- |
-| `customfield_10011` | Epic Name | Use only when live metadata exposes it for the target project and issue type. |
-| `customfield_10014` | Epic Link | Prefer live metadata or equivalent Epic-link capability over assumptions. |
-| `customfield_10059` | Story Type | Populate only when the user explicitly provides it and Jira accepts it. |
-| `customfield_10093` | Work Type | Default to `Feature` only for ERCD Epics and ERCD Tasks. |
+Supported curated keys:
+
+- `summary`
+- `parent_issue`
+- `parent_epic`
+- `fix_versions`
+- `labels`
+- `components`
+- `priority`
+- `assignee`
+- `reporter`
+- `work_type`
+- `description` through the markdown body
+
+## Custom Field Rules
+
+- `custom_fields` must be a mapping keyed by Jira field id.
+- Custom fields are passed through as authored after the loader verifies the field is editable for the target operation.
+- The loader must not infer custom field ids from display names.
+
+## Clear-Field Rules
+
+- `clear_fields` is supported only for `jira-update-v1`.
+- Clear only fields named explicitly in `clear_fields`.
+- Clear array-like fields with empty arrays where Jira expects arrays.
+- Clear other editable fields with `null`.
+- Reject attempts to clear `summary`.
 
 ## Live Metadata Precedence
 
-- If a maintained field ID exists but live metadata says the field is unavailable, unavailable wins.
-- If live metadata reports a required field that is absent from the local references, surface the gap and stop before mutation.
-- If project-specific references conflict with live metadata, prefer safe validation and resolve the discrepancy before mutation.
-
-## Create and Update Behaviors
-
-- Preserve the full markdown body as the Jira `description` for markdown-driven create and update actions.
-- Do not clear a Jira field during update unless the user explicitly asks to clear it and the preview shows the cleared value.
-- Do not infer labels, components, priority, assignee, sprint, story points, Epic Link, Story Type, or Fix Versions from vague context.
+- If local assumptions conflict with Jira metadata, Jira metadata wins.
+- If a curated field cannot be resolved to one editable Jira field at runtime, stop instead of guessing.
+- `parent_epic` and `work_type` must be resolved live because their Jira field ids may vary by project configuration.

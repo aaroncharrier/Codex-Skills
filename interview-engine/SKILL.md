@@ -7,14 +7,19 @@ description: Resolve ambiguity in prompt-generation and other requests through a
 
 Ask an excessive amount of questions until we have a complete understanding of the user request. Follow the workflow until you have a complete understanding.
 
-## Guardrails
+  ## Guardrails
 
-- Ask at least 2 rounds of questions
+- Ask at least 3 rounds of questions
 - Ask at least 20 questions in total
+- Treat `interview_questions.json` as user-editable session state, not as reasoning input.
+- After writing `interview_questions.json`, do not read it with `Get-Content` unless recovering from a corrupt session.
+- After the user updates answers, run `Extract-QuestionAnswers.ps1` and read only `question_answers.json` or another compact derived summary file.
+- Prefer scripts that write compact artifacts to disk over commands that print raw JSON into tool output.
+
 
 ## Handoff Contract
 
-- Canonical file: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.json`
+- interview questions: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_questions.json`
 - interview output: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/interview_output.json`
 - interview answers: `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/question_answers.json`
 
@@ -25,7 +30,7 @@ Ask an excessive amount of questions until we have a complete understanding of t
 3. emit `I updated the session-<yyyy-MM-dd_HH-mm-ss> JSON file.` in the chat session.
 4. Stop until user aknowledges questions are answered.
 5. Run `Extract-QuestionAnswers.ps1`
-6. Read `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/question_answers.json`
+6. Read `.interview-engine/session-<yyyy-MM-dd_HH-mm-ss>/question_answers.json` only  
 7. If guardrails are meet and you have a complete understanding execute the `Write-OutputJson.ps1` and exit skill
 8. If more questions are needed start step 1.
 

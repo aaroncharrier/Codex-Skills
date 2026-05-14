@@ -1,13 +1,6 @@
 interface:
   display_name: "Jira Updater"
-  short_description: "Validate and execute Jira mutations safely"
-  default_prompt: "Use $jira-updater to preview and then execute this Jira create, update, comment, attachment, or assigned-to-me request through Atlassian MCP."
-dependencies:
-  tools:
-    - type: "mcp"
-      value: "atlassian"
-      description: "Atlassian MCP server for Jira metadata, queries, and mutations"
-      transport: "streamable_http"
-      url: "https://mcp.atlassian.com/v1/mcp"
+  short_description: "Validate and execute Jira Cloud markdown artifacts"
+  default_prompt: "Use $jira-updater to validate and preview a Jira markdown artifact first, summarize the results, ask for confirmation, and apply only after the user replies exactly `proceed` or `yes`."
 policy:
   allow_implicit_invocation: true

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Jira Template Completer"
-  short_description: "Draft analytics Jira markdown issues"
-  default_prompt: "Use $jira-template-completer to generate or normalize a Jira-ready markdown issue in docs/Jira Documents from this analytics request."
