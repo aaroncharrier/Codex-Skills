@@ -1,0 +1,6 @@
+interface:
+  display_name: "Jira Updater"
+  short_description: "Validate and execute Jira Cloud markdown artifacts"
+  default_prompt: "Use $jira-updater to validate and preview a Jira markdown artifact first, summarize the results, ask for confirmation, and apply only after the user replies exactly `proceed` or `yes`."
+policy:
+  allow_implicit_invocation: true

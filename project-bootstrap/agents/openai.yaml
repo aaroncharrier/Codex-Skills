@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Bootstrap"
+  short_description: "Create analytics project scaffolds"
+  default_prompt: "Use $project-bootstrap to create a new project scaffold by creating the target folder and copying the full bundled template pack into it."
