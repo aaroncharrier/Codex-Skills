@@ -37,6 +37,7 @@ Ask an excessive amount of questions until we have a complete understanding of t
 ## Token Contract
 
 - Only emit `I updated the session-<yyyy-MM-dd_HH-mm-ss> JSON file.` in the chat
+- Only write new or unanswered questions
 
 ## Question Design
 

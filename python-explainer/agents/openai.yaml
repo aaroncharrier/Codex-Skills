@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Explainer"
+  short_description: "Explain Python code clearly and provide modern best-practice guidance when it is relevant."
+  default_prompt: "Use $python-explainer to explain this Python code clearly, then point out any important best-practice issues or improvements."

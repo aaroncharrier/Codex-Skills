@@ -1,13 +1,26 @@
 ---
 name: scratch-notes
-description: Capture short scratch reminders and task notes into an append-only Markdown file at the current project root. Use when the user wants a fast, low-friction place in Codex UI to record a reminder, follow-up, or task note without starting a broader task-management workflow.
+description: Capture short scratch notes, reminders, work observations, decisions, and task follow-ups into an append-only Markdown file at the current project root. Use when the user wants a fast, low-friction place in Codex UI to record operational context or career-relevant work evidence without starting a broader task-management workflow.
 ---
 
 # Scratch Notes
 
 ## Overview
 
-Capture one short user note into `scratch-notes.md` at the current project root. Keep the interaction one-shot, keep the reply to one line, and do not read the existing notes file before writing.
+Capture one short user note into `scratch-notes.md` at the current project root.
+
+This skill is optimized for fast capture of:
+
+- tasks
+- follow-ups
+- bugs
+- research findings
+- decisions
+- meeting notes
+- achievements
+- operational observations
+
+Keep the interaction one-shot, do not read the existing notes file before writing, and return a one-line confirmation only after the append succeeds.
 
 ## Workflow
 
@@ -22,12 +35,35 @@ Capture one short user note into `scratch-notes.md` at the current project root.
 - Do not assume facts beyond what the user typed.
 - Rewrite lightly for clarity while preserving names, dates, numbers, and direct commitments.
 - Keep uncertainty inline when the user expresses it.
-- Leave any missing component blank instead of guessing.
-- Use `High`, `Medium`, or `Low` only.
-- Normalize priority only from explicit priority wording. Leave it blank if the note does not clearly state one.
-- Fill `Summary` with a short restatement of the action when that can be done safely. If not, reuse the action wording with light cleanup.
-- Use `Note` only for extra context that does not fit cleanly in the other fields. Leave it blank when nothing extra is needed.
-- Do not add a status field.
+- Leave missing fields blank instead of guessing.
+- `Type` should normalize only when clearly implied.
+
+Allowed `Type` values:
+
+- Task
+- Bug
+- Decision
+- Research
+- Meeting
+- Achievement
+- Follow-up
+
+If no type is clearly implied, leave blank.
+
+Allowed `Status` values:
+
+- Open
+- Done
+- Blocked
+- Deferred
+
+Normalize status only when clearly implied. Otherwise leave blank.
+
+- `Summary` should contain the clearest concise statement of what happened or what needs to happen.
+- `Action Items` should contain concrete follow-up work only.
+- `Impact` should capture why the work matters, if explicitly stated or safely inferable from the user's note.
+- `Note` should contain extra context that does not fit cleanly elsewhere.
+- Do not add priority or other fields beyond the required shape.
 
 ## Required Markdown Shape
 
@@ -38,9 +74,11 @@ Always append a fresh heading for today's date. Do not read `scratch-notes.md` t
 
 - Date: YYYY-MM-DD
 - Project:
-- Priority: High|Medium|Low
-- Action Items:
+- Type:
 - Summary:
+- Action Items:
+- Impact:
+- Status:
 - Note:
 ```
 
@@ -56,9 +94,11 @@ Prefer the bundled helper script whenever possible. Run it from the project root
 Expected JSON keys per item:
 
 - `project`
-- `priority`
-- `action_items`
+- `type`
 - `summary`
+- `action_items`
+- `impact`
+- `status`
 - `note`
 
 Example:
@@ -67,10 +107,12 @@ Example:
 @'
 [
   {
-    "project": "Project Atlas",
-    "priority": "High",
-    "action_items": "Follow up with Dana on API cutoff",
-    "summary": "Follow up on API cutoff with Dana.",
+    "project": "Payments",
+    "type": "Bug",
+    "summary": "Duplicate invoice issue traced to vendor webhook retries.",
+    "action_items": "Validate fix in staging.",
+    "impact": "Prevent incorrect customer billing.",
+    "status": "Open",
     "note": ""
   }
 ]
