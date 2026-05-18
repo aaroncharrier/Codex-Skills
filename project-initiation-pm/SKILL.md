@@ -1,6 +1,6 @@
 ---
 name: project-initiation-pm
-description: Run conversation-first project initiation after project-bootstrap creates the scaffold. Use when Codex should read referenced project docs first, classify the work, interview the user 3 questions at a time, directly populate PROJECT_PLAN/WORK_LOG/OPEN_QUESTIONS docs, create only justified supporting data docs, escalate to BRD/PRD/SRD only when the project is expected to exceed 6 weeks, and deterministically delete the six unused BRD/PRD/SRD template/questionnaire files for shorter projects.
+description: Run conversation-first project initiation after project-bootstrap creates the scaffold. Use when Codex should read referenced project docs first, classify the work, interview the user 3 questions at a time, directly populate PROJECT_PLAN/WORK_LOG docs, create only justified supporting data docs, escalate to BRD/PRD/SRD only when the project is expected to exceed 6 weeks, and deterministically delete the six unused BRD/PRD/SRD template/questionnaire files for shorter projects.
 ---
 
 # Project Initiation PM
@@ -79,18 +79,7 @@ If the project duration is 6 weeks or less, do not keep BRD / PRD / SRD artifact
 ## Always Update
 
 - `docs/PROJECT_PLAN.md`
-- `docs/OPEN_QUESTIONS_AND_DECISIONS_LOG.md`
 - `docs/WORK_LOG.md`
-
-## Create or Retain Only When Justified
-
-- `docs/Data Documents/DATA_DICTIONARY_TEMPLATE.md`
-- `docs/Data Documents/DATA_MAPPING_DOCUMENT_TEMPLATE.md`
-- `docs/Data Documents/DATA_QUALITY_AND_RECONCILIATION_PLAN.md`
-- `docs/Data Documents/METRIC_DEFINITION_TEMPLATE.md`
-- `docs/Data Documents/METRIC_DEFINITION_SIMPLE_TEMPLATE.md`
-- `docs/Data Documents/METRIC_DICTIONARY_TEMPLATE.md`
-- `docs/Data Documents/RUNBOOK_SUPPORT_TEMPLATE.md`
 
 ## Large-Project-Only Files
 

@@ -26,7 +26,7 @@ function Get-FieldValue {
     return [string]$property.Value
 }
 
-function Normalize-Priority {
+function Normalize-Type {
     param(
         [string]$Value
     )
@@ -37,9 +37,32 @@ function Normalize-Priority {
     }
 
     switch -Regex ($text) {
-        "^(?i)high$" { return "High" }
-        "^(?i)medium$" { return "Medium" }
-        "^(?i)low$" { return "Low" }
+        "^(?i)task$" { return "Task" }
+        "^(?i)bug$" { return "Bug" }
+        "^(?i)decision$" { return "Decision" }
+        "^(?i)research$" { return "Research" }
+        "^(?i)meeting$" { return "Meeting" }
+        "^(?i)achievement$" { return "Achievement" }
+        "^(?i)follow[- ]?up$" { return "Follow-up" }
+        default { return "" }
+    }
+}
+
+function Normalize-Status {
+    param(
+        [string]$Value
+    )
+
+    $text = ""
+    if ($null -ne $Value) {
+        $text = $Value.Trim()
+    }
+
+    switch -Regex ($text) {
+        "^(?i)open$" { return "Open" }
+        "^(?i)(done|complete|completed)$" { return "Done" }
+        "^(?i)blocked$" { return "Blocked" }
+        "^(?i)deferred$" { return "Deferred" }
         default { return "" }
     }
 }
@@ -87,9 +110,11 @@ for ($index = 0; $index -lt $items.Count; $index++) {
 
     $lines.Add((Format-FieldLine -Label "Date" -Value $Date))
     $lines.Add((Format-FieldLine -Label "Project" -Value (Get-FieldValue -Item $item -Name 'project')))
-    $lines.Add((Format-FieldLine -Label "Priority" -Value (Normalize-Priority -Value (Get-FieldValue -Item $item -Name 'priority'))))
-    $lines.Add((Format-FieldLine -Label "Action Items" -Value (Get-FieldValue -Item $item -Name 'action_items')))
+    $lines.Add((Format-FieldLine -Label "Type" -Value (Normalize-Type -Value (Get-FieldValue -Item $item -Name 'type'))))
     $lines.Add((Format-FieldLine -Label "Summary" -Value (Get-FieldValue -Item $item -Name 'summary')))
+    $lines.Add((Format-FieldLine -Label "Action Items" -Value (Get-FieldValue -Item $item -Name 'action_items')))
+    $lines.Add((Format-FieldLine -Label "Impact" -Value (Get-FieldValue -Item $item -Name 'impact')))
+    $lines.Add((Format-FieldLine -Label "Status" -Value (Normalize-Status -Value (Get-FieldValue -Item $item -Name 'status'))))
     $lines.Add((Format-FieldLine -Label "Note" -Value (Get-FieldValue -Item $item -Name 'note')))
 
     if ($index -lt ($items.Count - 1)) {

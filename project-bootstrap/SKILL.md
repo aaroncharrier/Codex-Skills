@@ -60,7 +60,6 @@ The generated project layout is:
   docs/
     PROJECT_PLAN.md
     WORK_LOG.md
-    OPEN_QUESTIONS_AND_DECISIONS_LOG.md
     BRD PRD SRD/
       BRD_TEMPLATE.md
       PRD_TEMPLATE.md
@@ -81,7 +80,6 @@ The generated project layout is:
       BRD_QUESTIONNAIRE.md
       PRD_QUESTIONNAIRE.md
       SRD_QUESTIONNAIRE.md
-      OPEN_QUESTIONS_AND_DECISIONS_LOG_QUESTIONNAIRE.md
   repo/
 ```
 

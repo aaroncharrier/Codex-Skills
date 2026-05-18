@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quest Giver"
+  short_description: "Mentor-first project quest coaching"
+  default_prompt: "Use $quest-giver to design the next practical quest for this project and keep the local quest-wiki up to date."
