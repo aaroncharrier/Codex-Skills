@@ -13,7 +13,7 @@
 | Last Updated | `[YYYY-MM-DD]` |
 | Status | `[Draft / In Review / Approved / Active / Closed]` |
 
-## 1. Objective & KPIs
+## 1. Project Overview
 
 ### Objective
 
@@ -25,15 +25,29 @@
 - Primary users / stakeholders: `[Who will use or depend on the output?]`
 - Business value: `[Revenue, cost, time saved, risk reduction, trust, compliance, etc.]`
 
-### KPIs
+### Deliverables
 
-| KPI | Baseline | Target | Target Date | Owner | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `[Example: Dashboard refresh SLA]` | `[Current]` | `[Target]` | `[YYYY-MM-DD]` | `[Name]` | `[Context]` |
-| `[Example: Manual reporting hours / month]` | `[Current]` | `[Target]` | `[YYYY-MM-DD]` | `[Name]` | `[Context]` |
-| `[Example: Data quality defect rate]` | `[Current]` | `[Target]` | `[YYYY-MM-DD]` | `[Name]` | `[Context]` |
+| Deliverable ID | Deliverable | Description | Owner | Due Date | Acceptance Criteria | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| D1 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
+| D2 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
+| D3 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
 
-## 2. Scope
+
+## 2. Success Metrics
+
+| Type | Metric | Target | Measurement Method |
+| --- | --- | --- | --- |
+| `[Delivery / Operational / Business]` | `[Metric]` | `[Target]` | `[How measured]` |
+| `Delivery` | `[On-time milestone delivery]` | `[Target]` | `[How measured]` |
+| `Operational` | `[Scope completion]` | `[Target]` | `[How measured]` |
+| `Operational` | `[Pipeline success rate]` | `[Target]` | `[How measured]` |
+| `Operational` | `[Freshness SLA attainment]` | `[Target]` | `[How measured]` |
+| `Business` | `[Monthly active dashboard users]` | `[Target]` | `[How measured]` |
+| `Business` | `[Reduction in manual effort]` | `[Target]` | `[How measured]` |
+| `Business` | `[Improvement in business KPI]` | `[Target]` | `[How measured]` |
+
+## 3. Scope
 
 ### In Scope
 
@@ -46,18 +60,13 @@
 - `[Explicitly excluded systems, metrics, geographies, teams, use cases, etc.]`
 - `[Future phase items not covered in this project]`
 
-### Assumptions
-
-- `[Key assumption 1]`
-- `[Key assumption 2]`
-
 ### Constraints
 
 - `[Budget / tooling / access / timing / compliance / staffing constraints]`
 
-## 3. Architecture Summary
+## 4. Architecture Summary
 
-### Current State
+### Current State (if exists)
 
 `[Brief summary of the current architecture and pain points.]`
 
@@ -85,7 +94,17 @@
 - Data model / lineage: `[Link]`
 - Standards / design docs: `[Link]`
 
-## 4. Phases & Milestones
+
+## 5. Questions / Deceisions
+
+Use this section to track unresolved questions, working assumptions, approved decisions, and delivery dependencies in one place. Review it regularly so assumptions do not quietly become facts.
+
+| Type | Description | Why It Matters | Owner | Due | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `[Question / Decision / Risk / Dependency]` | `[Description]` | `[Impact on scope, architecture, testing, or delivery]` | `[Name]` | `[YYYY-MM-DD]` | `[Open / In Review / Resolved / Closed]` | `[Context, blocker, or next step]` |
+| `[Question]` | `[Description]` | `[Impact]` | `[Name]` | `[YYYY-MM-DD]` | `[Status]` | `[Notes]` |
+
+## 6. Phases & Milestones
 
 ### Phase Summary
 
@@ -97,240 +116,14 @@
 | 4. Validation & UAT | `[Goal]` | `[YYYY-MM-DD]` | `[YYYY-MM-DD]` | `[Criteria]` | `[Name]` | `[Status]` |
 | 5. Rollout & Stabilization | `[Goal]` | `[YYYY-MM-DD]` | `[YYYY-MM-DD]` | `[Criteria]` | `[Name]` | `[Status]` |
 
-### Milestone Tracker
-
-| Milestone ID | Milestone | Phase | Due Date | Status | Owner | Deliverable | Success Criteria | Dependencies | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M1 | `[Milestone name]` | `[Phase]` | `[YYYY-MM-DD]` | `[Status]` | `[Name]` | `[Output]` | `[Definition of done]` | `[Key dependency]` | `[Context]` |
-| M2 | `[Milestone name]` | `[Phase]` | `[YYYY-MM-DD]` | `[Status]` | `[Name]` | `[Output]` | `[Definition of done]` | `[Key dependency]` | `[Context]` |
-
 ### Detailed Task Plan
 
-Use one table per phase so execution details stay readable.
-
-#### Phase 1: `[Phase name]`
-
-**Phase objective:** `[What this phase is expected to achieve.]`
-
-- **P1-T1**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[S / M / L / XL or story points]`
-  - **Status:** `[Not Started / In Progress / Blocked / Done]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Concrete output]`
-  - **Dependencies:** `[Task IDs or external dependency]`
-  - **Context / Notes:** `[Business or technical context]`
-
-- **P1-T2**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-- **P1-T3**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M2]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-#### Phase 2: `[Phase name]`
-
-**Phase objective:** `[What this phase is expected to achieve.]`
-
-- **P2-T1**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[S / M / L / XL or story points]`
-  - **Status:** `[Not Started / In Progress / Blocked / Done]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Concrete output]`
-  - **Dependencies:** `[Task IDs or external dependency]`
-  - **Context / Notes:** `[Business or technical context]`
-
-- **P2-T2**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-- **P2-T3**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M2]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-#### Phase 3: `[Phase name]`
-
-**Phase objective:** `[What this phase is expected to achieve.]`
-
-- **P3-T1**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[S / M / L / XL or story points]`
-  - **Status:** `[Not Started / In Progress / Blocked / Done]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Concrete output]`
-  - **Dependencies:** `[Task IDs or external dependency]`
-  - **Context / Notes:** `[Business or technical context]`
-
-- **P3-T2**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-- **P3-T3**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M2]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-#### Phase 4: `[Phase name]`
-
-**Phase objective:** `[What this phase is expected to achieve.]`
-
-- **P4-T1**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[S / M / L / XL or story points]`
-  - **Status:** `[Not Started / In Progress / Blocked / Done]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Concrete output]`
-  - **Dependencies:** `[Task IDs or external dependency]`
-  - **Context / Notes:** `[Business or technical context]`
-
-- **P4-T2**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-- **P4-T3**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M2]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-#### Phase 5: `[Phase name]`
-
-**Phase objective:** `[What this phase is expected to achieve.]`
-
-- **P5-T1**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[S / M / L / XL or story points]`
-  - **Status:** `[Not Started / In Progress / Blocked / Done]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Concrete output]`
-  - **Dependencies:** `[Task IDs or external dependency]`
-  - **Context / Notes:** `[Business or technical context]`
-
-- **P5-T2**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M1]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-- **P5-T3**
-  - **Task:** `[Task name]`
-  - **Milestone:** `[M2]`
-  - **Start Date:** `[YYYY-MM-DD]`
-  - **End Date:** `[YYYY-MM-DD]`
-  - **Size:** `[Size]`
-  - **Status:** `[Status]`
-  - **Owner:** `[Name]`
-  - **Deliverable:** `[Output]`
-  - **Dependencies:** `[Dependency]`
-  - **Context / Notes:** `[Context]`
-
-## 5. Deliverables
-
-| Deliverable ID | Deliverable | Description | Owner | Due Date | Acceptance Criteria | Status |
+| Phase | Task | Deliverable | Status | Role | Notes | Impact |
 | --- | --- | --- | --- | --- | --- | --- |
-| D1 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
-| D2 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
-| D3 | `[Deliverable name]` | `[Description]` | `[Name]` | `[YYYY-MM-DD]` | `[Definition of done]` | `[Status]` |
+| [Discovery / Data Foundation / Modeling / UAT / Rollout] | [Task name] | [Concrete output] | [Not Started / In Progress / Blocked / Done] | [Technical Lead / Product / Analytics Lead / Owner] | [Business or technical context] | [Impact] |
+| [Phase] | [Task name] | [Concrete output] | [Status] | [Technical Lead / Product / Analytics Lead / Owner] | [Context] | [Impact] |
+| [Phase] | [Task name] | [Concrete output] | [Status] | [Technical Lead / Product / Analytics Lead / Owner] | [Context] | [Impact] |
 
-## 6. Dependencies & Risks
-
-### Key Dependencies
-
-| Dependency ID | Dependency | Type | Owner | Needed By | Impact if Delayed | Mitigation |
-| --- | --- | --- | --- | --- | --- | --- |
-| DEP-1 | `[Description]` | `[Upstream system / access / SME / vendor / platform / governance]` | `[Name]` | `[YYYY-MM-DD]` | `[Impact]` | `[Mitigation]` |
-| DEP-2 | `[Description]` | `[Type]` | `[Name]` | `[YYYY-MM-DD]` | `[Impact]` | `[Mitigation]` |
-
-### Risk Register
-
-| Risk ID | Risk | Likelihood | Impact | Owner | Trigger | Mitigation / Response | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| R1 | `[Risk description]` | `[Low / Medium / High]` | `[Low / Medium / High]` | `[Name]` | `[What would indicate this risk is materializing?]` | `[Mitigation]` | `[Open / Monitoring / Closed]` |
-| R2 | `[Risk description]` | `[Likelihood]` | `[Impact]` | `[Name]` | `[Trigger]` | `[Mitigation]` | `[Status]` |
 
 ## 7. Data Quality Plan
 
@@ -343,10 +136,10 @@ Use one table per phase so execution details stay readable.
 
 ### Quality Checks
 
-| Check ID | Check Type | Rule / Validation | Threshold | Frequency | Owner | Escalation Path |
-| --- | --- | --- | --- | --- | --- | --- |
-| DQ-1 | `[Freshness / Completeness / Accuracy / Consistency / Uniqueness / Reconciliation]` | `[Rule]` | `[Threshold]` | `[Hourly / Daily / Weekly / Per run]` | `[Name]` | `[Team / channel / ticket queue]` |
-| DQ-2 | `[Type]` | `[Rule]` | `[Threshold]` | `[Frequency]` | `[Name]` | `[Path]` |
+| Check Type | Rule / Validation | Threshold | Frequency | Owner | Escalation Path |
+| --- | --- | --- | --- | --- | --- |
+| `[Freshness / Completeness / Accuracy / Consistency / Uniqueness / Reconciliation]` | `[Rule]` | `[Threshold]` | `[Hourly / Daily / Weekly / Per run]` | `[Name]` | `[Team / channel / ticket queue]` |
+| `[Type]` | `[Rule]` | `[Threshold]` | `[Frequency]` | `[Name]` | `[Path]` |
 
 ### Defect Management
 
@@ -356,50 +149,8 @@ Use one table per phase so execution details stay readable.
 - SLA for response and resolution: `[Target]`
 - Audit trail location: `[Tool / ticket system / incident log]`
 
-## 8. Success Metrics
 
-### Delivery Success
-
-| Metric | Target | Measurement Method | Owner | Reporting Cadence |
-| --- | --- | --- | --- | --- |
-| `[On-time milestone delivery]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-| `[Scope completion]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-
-### Operational Success
-
-| Metric | Target | Measurement Method | Owner | Reporting Cadence |
-| --- | --- | --- | --- | --- |
-| `[Pipeline success rate]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-| `[Freshness SLA attainment]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-
-### Business Success
-
-| Metric | Target | Measurement Method | Owner | Reporting Cadence |
-| --- | --- | --- | --- | --- |
-| `[Monthly active dashboard users]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-| `[Reduction in manual effort]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-| `[Improvement in business KPI]` | `[Target]` | `[How measured]` | `[Name]` | `[Cadence]` |
-
-## 9. Resources
-
-### Team & Roles
-
-| Role | Name | Team | Responsibility |
-| --- | --- | --- | --- |
-| Sponsor | `[Name]` | `[Team]` | `[Responsibility]` |
-| Product / Analytics Lead | `[Name]` | `[Team]` | `[Responsibility]` |
-| Data Engineer | `[Name]` | `[Team]` | `[Responsibility]` |
-| Analytics Engineer | `[Name]` | `[Team]` | `[Responsibility]` |
-| BI Developer / Analyst | `[Name]` | `[Team]` | `[Responsibility]` |
-| Data Steward / QA | `[Name]` | `[Team]` | `[Responsibility]` |
-
-### Tooling / Environment Needs
-
-- `[Warehouse / lakehouse / orchestration / BI / observability / ticketing / source control]`
-- `[Sandbox / dev / test / prod environments]`
-- `[Access requirements and approvals]`
-
-## 10. Rollout Plan
+## 8. Rollout Plan
 
 ### Rollout Strategy
 
@@ -425,7 +176,14 @@ Use one table per phase so execution details stay readable.
 - Rollback steps: `[High-level actions]`
 - Communication plan: `[Who is notified and how?]`
 
-## 11. Status Definitions
+## 9. Key Achievements
+
+| Achievement | Outcome | Business Impact |
+| --- | --- | --- |
+| `[Designed reusable semantic model]` | `[standardized KPI definitions]` | `[reduced reporting inconsistency]` |
+| `[Automated finance reporting workflow]` | `[replaced manual process]` | `[saved 20 hrs/month]` |
+
+## 10. Status Definitions
 
 | Status | Meaning |
 | --- | --- |
@@ -434,12 +192,3 @@ Use one table per phase so execution details stay readable.
 | Blocked | Work cannot proceed due to an issue or dependency. |
 | At Risk | Work is moving, but timeline or scope risk exists. |
 | Done | Work is complete and acceptance criteria are met. |
-
-## 12. Size Definitions
-
-| Size | Meaning |
-| --- | --- |
-| S | Small task, typically completed quickly with low coordination overhead. |
-| M | Medium task, moderate effort and some coordination required. |
-| L | Large task, multi-step effort across roles or systems. |
-| XL | Extra-large task that should likely be broken down further. |
