@@ -1,0 +1,4 @@
+interface:
+  display_name: "Measurable Task Plan"
+  short_description: "Create measurable execution task plans"
+  default_prompt: "Use $measurable-task-plan to turn this objective into MEASURABLE_TASK_PLAN.md."
