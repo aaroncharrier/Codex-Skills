@@ -48,6 +48,7 @@ FILE_TARGETS = [
     ("questionnaires/PRD_QUESTIONNAIRE.md", "docs/questionnaires/PRD_QUESTIONNAIRE.md"),
     ("questionnaires/RUNBOOK_SUPPORT_QUESTIONNAIRE.md", "docs/Data Documents/RUNBOOK_SUPPORT_QUESTIONNAIRE.md"),
     ("questionnaires/SRD_QUESTIONNAIRE.md", "docs/questionnaires/SRD_QUESTIONNAIRE.md"),
+    ("templates/NOTEBOOK_BUILD_REQUIREMENTS.md", "docs/NOTEBOOK_BUILD_REQUIREMENTS.md"),
 ]
 
 
